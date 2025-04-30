@@ -3,8 +3,8 @@ import React from 'react';
 import Header from './components/Header';
 import Sidebar from './components/Sidebar';
 import Footer from './components/Footer';
-import Home from './components/Home';
-import FileUpload from './components/FileUpload';
+import Home from './pages/Home';
+import FileUpload from './pages/FileUpload';
 import { Route, Routes } from 'react-router-dom'; // Removed BrowserRouter import
 
 const App = () => {

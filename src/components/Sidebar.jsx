@@ -13,9 +13,9 @@ const Sidebar = () => {
           <li className="mb-2">
             <Link to="/upload-clip" className="hover:underline">Upload News Clip</Link>
           </li>
-          <li className="mb-2">
+          {/* <li className="mb-2">
             <Link to="/contact" className="hover:underline">Contact</Link>
-          </li>
+          </li> */}
         </ul>
       </nav>
     </aside>
