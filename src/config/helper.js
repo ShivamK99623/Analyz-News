@@ -45,7 +45,7 @@ api.interceptors.response.use(
 
   const requestConfig = (options) => {
     const config = {
-        headers: options.headers || { "Content-Type": "application/json" },
+        // headers: options.headers || { "Content-Type": "application/json" },
         url: options.url,
         method: options.method,
         ...options,

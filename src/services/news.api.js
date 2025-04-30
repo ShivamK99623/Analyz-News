@@ -6,3 +6,9 @@ export const uploadImage=(formData)=>{
         body:formData
     })
 }
+export const getReports=(pageNumber,pageSize)=>{
+    return request({
+        url:`/get-reports?page_number=${pageNumber}&page_size=${pageSize}`,
+        method:'GET',
+    })
+}

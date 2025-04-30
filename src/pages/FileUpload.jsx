@@ -57,7 +57,7 @@ const FileUpload = () => {
 
     const formData = new FormData();
     files.forEach((file, index) => {
-      formData.append(`files[${index}]`, file);
+      formData.append(`files`, file);
     });
     // Add metadata to form data
     // formData.append('edition', edition);
@@ -66,14 +66,15 @@ const FileUpload = () => {
 
     try {
       const response = await uploadImage(formData);
-      if (response.ok) {
-        alert('Files uploaded successfully!');
-        setFiles([]);
-        setName('');
-        setDescription('');
-      } else {
-        throw new Error('Upload failed');
-      }
+      console.log(response)
+      // if (response.ok) {
+      //   alert('Files uploaded successfully!');
+      //   setFiles([]);
+      //   setName('');
+      //   setDescription('');
+      // } else {
+      //   throw new Error('Upload failed');
+      // }
     } catch (error) {
       console.error('Error uploading files:', error);
       alert('Error uploading files');
