@@ -150,7 +150,7 @@
 import React from 'react';
 import { useState, useRef } from 'react';
 
-const About = () => {
+const FileUpload = () => {
   const [files, setFiles] = useState([]);
   const [isDragging, setIsDragging] = useState(false);
   const [edition, setEdition] = useState('morning'); // State for edition dropdown
@@ -328,4 +328,4 @@ const About = () => {
   );
 };
 
-export default About;
+export default FileUpload;
