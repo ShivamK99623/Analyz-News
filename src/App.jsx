@@ -1,14 +1,28 @@
-import { useState } from 'react'
-import './App.css'
+// src/App.js
+import React from 'react';
+import Header from './components/Header';
+import Sidebar from './components/Sidebar';
+import Footer from './components/Footer';
+import Home from './components/Home';
+import About from './components/About';
+import { Route, Routes } from 'react-router-dom'; // Removed BrowserRouter import
 
-function App() {
-  const [count, setCount] = useState(0)
-
+const App = () => {
   return (
-    <>
-     <h1 className='text-6xl'>asas</h1>
-    </>
-  )
-}
+      <div className="flex flex-col h-screen">
+        <Header />
+        <div className="flex flex-grow">
+          <Sidebar />
+          <main className="flex-grow p-4 bg-gray-200">
+          <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/upload-clip" element={<About />} />
+          </Routes>
+          </main>
+        </div>
+        {/* <Footer /> */}
+      </div>
+  );
+};
 
-export default App
+export default App;
