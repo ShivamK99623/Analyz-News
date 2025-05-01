@@ -21,22 +21,22 @@ const ColorCode = {
 const allNews = [
   {
     id: 1,
-    title: "News 1 Title",
-    status: "Positive",
+    name: "News 1 Title",
+    status: "PENDING",
     summary: "A brief overview of News 1.",
     description: "Full description of News 1...",
   },
   {
     id: 2,
-    title: "News 2 Title",
-    status: "Negative",
+    name: "News 2 Title",
+    status: "COMPLETE",
     summary: "A brief overview of News 2.",
     description: "Full description of News 2...",
   },
   {
     id: 3,
-    title: "News 3 Title",
-    status: "Neutral",
+    name: "News 3 Title",
+    status: "FAILED",
     summary: "A brief overview of News 3.",
     description: "Full description of News 3...",
   },
@@ -44,12 +44,17 @@ const allNews = [
 
 import { ReportPDF } from '../components/Pdfgenerate'
 import { getReports } from '../services/news.api';
+import Pagination from '../components/element/Pagination';
 const Home = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
   const [newsList, setNewsList] = useState([]);
-  const [pageSize, setPageSize] = useState(10);
-  const [pageNumber, , setPageNumber] = useState(1);
+  const [pageNumber, setPageNumber] = useState(1);
+  const [pageSize, setPageSize] = useState(5);
+  const [pageinfo, setPageinfo] = useState({
+    total_record:1
+  });
+  const [error, setPageError] = useState("No Data Available !");
 
   const openModal = (item) => {
     setSelectedItem(item);
@@ -88,13 +93,16 @@ const Home = () => {
   };
 
   useEffect(() => {
-    getReports(pageNumber,pageSize).then(res=>{
-      if(res.status_code=== 200){
-        let {record,page_info}= res.data
+    getReports(pageNumber, pageSize).then(res => {
+      if (res.status_code === 200) {
+        let { record, page_info } = res.data
         setNewsList(record)
-      }else throw res
-    }).catch(err=>{
-      console.log({err})
+        setPageinfo(page_info)
+        setPageError(!record.length && "No Data Available !")
+      } else throw res
+    }).catch(err => {
+      setPageError("Unable to load data !")
+      console.log({ err })
     })
   }, [pageNumber, pageSize])
 
@@ -143,31 +151,31 @@ const Home = () => {
       {/* Table */}
       <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
         <thead className="text-xs text-gray-700 uppercase bg-gray-50  dark:text-gray-400">
-          <tr>
+          <tr className='text-base'>
             <th scope="col" className="p-4">
               <div className="flex items-center">
                 <input id="checkbox-all-search" type="checkbox" className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 " />
                 <label htmlFor="checkbox-all-search" className="sr-only">checkbox</label>
               </div>
             </th>
-            <th scope="col" className="px-6 py-3">
+            <th scope="col" className="px-4 py-3">
               Title
             </th>
-            <th scope="col" className="px-6 py-3">
+            <th scope="col" className="px-4 py-3">
               Description
             </th>
-            <th scope="col" className="px-6 py-3">
+            <th scope="col" className="px-4 py-3">
               Status
             </th>
-            <th scope="col" className="px-6 py-3">
+            <th scope="col" className="px-4 py-3">
               Action
             </th>
           </tr>
         </thead>
-        <tbody className='relative'>
-          {!newsList.length && <div  className='min-h-64   flex justify-center items-center'>
-            <div className='absolute left-0 h-full w-full flex justify-center text-3xl items-center'>No Data Available</div>
-            </div>}
+        <tbody className='relative border-b-2'>
+          {!newsList.length && <div className='min-h-64   flex justify-center items-center'>
+            <div className='absolute left-0 h-full w-full bg-white flex justify-center text-3xl items-center'>{error}</div>
+          </div>}
           {newsList.map((item) => (
             <tr key={item.id} className="bg-white border-b  border-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600">
               <td className="w-4 p-4">
@@ -179,15 +187,15 @@ const Home = () => {
                   <label htmlFor={`checkbox-table-search-${item.id}`} className="sr-only">checkbox</label>
                 </div>
               </td>
-              <th scope="row" className="flex items-center px-6 py-4 text-gray-900 whitespace-nowrap dark:text-white">
+              <th scope="row" className="flex items-center px-4 py-4  whitespace-nowrap ">
                 <div className="">
                   <div className="text-base font-semibold">{item.name}</div>
                 </div>
               </th>
-              <td className="px-6 py-4">
+              <td className="px-4 py-4">
                 {item.description}
               </td>
-              <td className="px-6 py-4">
+              <td className="px-4 py-4">
                 <div className="flex items-center">
                   <div className={`h-2.5 w-2.5 mr-2 rounded-full ${ColorCode[item.status]}`}></div>
                   {item.status}
@@ -213,6 +221,18 @@ const Home = () => {
             </tr>
           ))}
         </tbody>
+        <tfoot>
+          <tr>
+            <th scope="row" colSpan={5} className='text-end p-2'>
+             <Pagination 
+              pageSize={pageSize}
+              onPageSize={setPageSize}
+              totalPages={Math.round(pageinfo.total_record/pageSize)}
+              currentPage={pageNumber}
+              onPageChange={(e)=>setPageNumber(e)}/>
+            </th>
+          </tr>
+        </tfoot>
       </table>
     </div>
   )
