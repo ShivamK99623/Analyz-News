@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Create axios instance
 export const api = axios.create({
-  baseURL: 'https://5fbe-2405-201-400b-20c4-305-1257-19b2-d4f9.ngrok-free.app'
+  baseURL: 'http://192.168.29.55:8000'
 });
 
 api.interceptors.request.use(
