@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { FaDownload, FaTrash, FaSearch } from 'react-icons/fa';
+import { FaDownload, FaTrash, FaSearch, FaEye } from 'react-icons/fa';
 
 import { pdf } from '@react-pdf/renderer';
 import { saveAs } from 'file-saver'; // install via `npm install file-saver`
@@ -43,7 +43,7 @@ const allNews = [
 ];
 
 import { ReportPDF } from '../components/Pdfgenerate'
-import { getReports } from '../services/news.api';
+import { getReportById, getReports } from '../services/news.api';
 import Pagination from '../components/element/Pagination';
 const Home = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -54,7 +54,7 @@ const Home = () => {
   const [pageinfo, setPageinfo] = useState({
     total_record:1
   });
-  const [error, setPageError] = useState("No Data Available !");
+  const [error, setPageError] = useState("Loading...");
 
   const openModal = (item) => {
     setSelectedItem(item);
@@ -79,18 +79,54 @@ const Home = () => {
   };
 
   const handleDownloadPDF = async (selectedNews) => {
-    const blob = await pdf(
-      <ReportPDF
-        reportName={reportName}
-        logoUrl={logoUrl}
-        newsList={selectedNews.map((n) => n.name)}
-        newsDetails={selectedNews}
-      />
-    ).toBlob();
+    selectedNews.map(({id})=>{
+      getReportById(id).then(async (response)=>{
+        if(response.status_code===200 && response.data){
+        let {report_data:{description,name}={},report_data,news_clip}=response.data
+        console.log({news_clip})
+        const blob = await pdf(
+          <ReportPDF
+            reportName={name}
+            logoUrl={logoUrl}
+            newsList={selectedNews.map((n) => n.name)}
+            newsDetails={news_clip}
+            description={description}
+          />
+        ).toBlob();
+        saveAs(blob, `${reportName}.pdf`);
+        closeModal()
+      }
+  
+  
+      })
+    })
 
-    saveAs(blob, `${reportName}.pdf`);
-    closeModal()
+
   };
+
+  const handlePreviewPDF = async (selectedNews) => {
+    selectedNews.map(({ id }) => {
+      getReportById(id).then(async (response) => {
+        if (response.status_code === 200 && response.data) {
+          let { report_data: { description, name } = {}, news_clip } = response.data;
+  
+          const blob = await pdf(
+            <ReportPDF
+              reportName={name}
+              logoUrl={logoUrl}
+              newsList={selectedNews.map((n) => n.name)}
+              newsDetails={news_clip}
+              description={description}
+            />
+          ).toBlob();
+  
+          const blobURL = URL.createObjectURL(blob);
+          window.open(blobURL, '_blank');
+        }
+      });
+    });
+  };
+  
 
   useEffect(() => {
     getReports(pageNumber, pageSize).then(res => {
@@ -135,11 +171,11 @@ const Home = () => {
       {/* Search Section */}
       <div className="flex items-center justify-end flex-column gap-2 flex-wrap md:flex-row space-y-4 md:space-y-0 p-4 bg-white border-b-2">
         {/* <label htmlFor="table-search" className="sr-only">Search</label> */}
-        {selectedNews.length > 0 && (
+        {/* {selectedNews.length > 0 && (
           <button onClick={() => openModal(selectedNews)} type="button" className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5  dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">
             Download
           </button>
-        )}
+        )} */}
         <div className="relative">
           <div className="absolute inset-y-0 rtl:inset-r-0 start-0 flex items-center ps-3 pointer-events-none">
             <FaSearch className="w-4 h-4 text-gray-500 dark:text-gray-400" />
@@ -152,12 +188,12 @@ const Home = () => {
       <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
         <thead className="text-xs text-gray-700 uppercase bg-gray-50  dark:text-gray-400">
           <tr className='text-base'>
-            <th scope="col" className="p-4">
+            {/* <th scope="col" className="p-4">
               <div className="flex items-center">
                 <input id="checkbox-all-search" type="checkbox" className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 " />
                 <label htmlFor="checkbox-all-search" className="sr-only">checkbox</label>
               </div>
-            </th>
+            </th> */}
             <th scope="col" className="px-4 py-3">
               Title
             </th>
@@ -167,18 +203,22 @@ const Home = () => {
             <th scope="col" className="px-4 py-3">
               Status
             </th>
-            <th scope="col" className="px-4 py-3">
+            <th scope="col" className="px-4 py-3 text-center">
               Action
             </th>
           </tr>
         </thead>
-        <tbody className='relative border-b-2'>
-          {!newsList.length && <div className='min-h-64   flex justify-center items-center'>
-            <div className='absolute left-0 h-full w-full bg-white flex justify-center text-3xl items-center'>{error}</div>
-          </div>}
+        <tbody className='border-b-2 max-h-52 relative'>
+          {!newsList.length && <tr className='flex justify-center  min-h-64    items-center'>
+            <td colSpan={5}>
+
+                <div className='absolute left-0 top-0 h-full w-full bg-white flex justify-center text-3xl items-center'>{error}</div>
+
+            </td>
+          </tr>}
           {newsList.map((item) => (
             <tr key={item.id} className="bg-white border-b  border-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600">
-              <td className="w-4 p-4">
+              {/* <td className="w-4 p-4">
                 <div className="flex items-center">
                   <input
                     checked={isChecked(item.id)}
@@ -186,7 +226,7 @@ const Home = () => {
                     id={`checkbox-table-search-${item.id}`} type="checkbox" className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" />
                   <label htmlFor={`checkbox-table-search-${item.id}`} className="sr-only">checkbox</label>
                 </div>
-              </td>
+              </td> */}
               <th scope="row" className="flex items-center px-4 py-4  whitespace-nowrap ">
                 <div className="">
                   <div className="text-base font-semibold">{item.name}</div>
@@ -201,14 +241,21 @@ const Home = () => {
                   {item.status}
                 </div>
               </td>
-              <td className="px-6 py-4">
-                <div className="flex space-x-2">
+              <td className="px-6 py-4 text-right">
+                <div className="flex space-x-2 justify-center">
                   <button
                     onClick={() => openModal([item])}
                     className="text-blue-600 hover:text-blue-900 dark:text-blue-500 dark:hover:text-blue-300 cursor-pointer"
                     title="Download"
                   >
                     <FaDownload className="h-5 w-5" />
+                  </button>
+                  <button
+                    onClick={() => handlePreviewPDF([item])}
+                    className="text-blue-600 hover:text-blue-900 dark:text-blue-500 dark:hover:text-blue-300 cursor-pointer"
+                    title="Download"
+                  >
+                    <FaEye className="h-5 w-5" />
                   </button>
                   <button
                     className="text-red-600 hover:text-red-900 dark:text-red-500 dark:hover:text-red-300 cursor-pointer"
@@ -223,7 +270,7 @@ const Home = () => {
         </tbody>
         <tfoot>
           <tr>
-            <th scope="row" colSpan={5} className='text-end p-2'>
+            <th scope="row" colSpan={4} className='text-end p-2'>
              <Pagination 
               pageSize={pageSize}
               onPageSize={setPageSize}

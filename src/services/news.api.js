@@ -12,3 +12,9 @@ export const getReports=(pageNumber,pageSize)=>{
         method:'GET',
     })
 }
+export const getReportById=(id)=>{
+    return request({
+        url:`/get-report-by-id?report_id=${id}`,
+        method:'GET',
+    })
+}
